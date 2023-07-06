@@ -3,13 +3,13 @@ pipeline {
 
     stages {
         stage('Build') {
-            steps{
-              echo 'building works'
-            }
-        }
-        stage('test') {
-            steps{
-              echo 'testing works'
+            steps {
+                script {
+                    docker.withRegistry('pavanbhat99/cicd') {
+                        // Optional: Login to your Docker registry
+                        docker.image('testimage').build('.')
+                    }
+                }
             }
         }
     }
