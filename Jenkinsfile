@@ -1,31 +1,24 @@
-pipeline{
+pipeline {
     agent any
-    // options{
-    //     buildDiscarder(logRotator(numToKeepStr: '5', daysToKeepStr: '5'))
-    //     timestamps()
-    // }
-    environment{
+    environment {
+    DOCKERHUB_CREDENTIALS = credentials('dockerhub-cred')
+    }
+    stages {
 
-        registry = "pavanbhat99/cicd"
-        registryCredential = 'dockerhub-cred'
-    }
-
-    stages{
-       stage('Building Image') {
-      steps{
-        script {
-          dockerImage = docker.build registry + ":$BUILD_NUMBER"
+        stage('Build docker image') {
+            steps {
+                sh 'docker build -t pavanbhat99/cicd .'
+            }
         }
-      }
-    }
-       stage('Push Image') {
-      steps{
-         script {
-            docker.withRegistry( '', registryCredential ) {
-            dockerImage.push()
-          }
+        stage('login to dockerhub') {
+            steps{
+                sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
+            }
         }
-      }
-    }
+        stage('push image') {
+            steps{
+                sh 'docker push pavanbhat99/cicd:$BUILD_NUMBER'
+            }
+        }
 }
 }
